@@ -22,8 +22,8 @@ class Memorizer<A, V> implements Computable<A, V> {
     @Override
     public V compute(final A toCompute) throws InterruptedException {
         while (true) {
-            Future<V> maybeComputedFuture = cache.get(toCompute);
-            if (maybeComputedFuture == null) {
+            Future<V> maybeComputed = cache.get(toCompute);
+            if (maybeComputed == null) {
                 Callable<V> eval = new Callable<V>() {
                     @Override
                     public V call() throws InterruptedException {
@@ -33,13 +33,13 @@ class Memorizer<A, V> implements Computable<A, V> {
                 FutureTask<V> maybeComputedFutureTask = new FutureTask<V>(eval);
                 // atomic opp
                 cache.putIfAbsent(toCompute, maybeComputedFutureTask);
-                if (maybeComputedFuture == null) {
-                    maybeComputedFuture = maybeComputedFutureTask;
+                if (maybeComputed == null) {
+                    maybeComputed = maybeComputedFutureTask;
                     maybeComputedFutureTask.run();
                 }
             }
             try {
-                return maybeComputedFuture.get();
+                return maybeComputed.get();
             } catch (ExecutionException ex) {
                 throw new RuntimeException();
             }
