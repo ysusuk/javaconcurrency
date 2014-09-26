@@ -2,6 +2,7 @@ package javaconcurrency;
 
 import net.jcip.annotations.GuardedBy;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.*;
 
@@ -42,7 +43,11 @@ public abstract class SocketUsingTask<T>
 
     @Override
     public void cancel() {
-
+        try {
+            this.socket.close();
+        } catch (IOException exc) {
+            throw new RuntimeException("Could not cancel socket", exc);
+        }
     }
 
     @Override
